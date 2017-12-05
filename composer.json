@@ -1,0 +1,13 @@
+{
+	"autoload": {
+		"psr-0": {
+			"file":"lib/",
+			"code":"lib/",
+			"general":"lib/"
+		}
+	},
+    "require": {
+        "nikic/php-parser": "^3.1",
+        "kktsvetkov/krumo": "^0.4.0"
+    }
+}
