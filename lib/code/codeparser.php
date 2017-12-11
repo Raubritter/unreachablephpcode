@@ -16,7 +16,6 @@ namespace code;
 use PhpParser\Error;
 use PhpParser\ParserFactory;
 use PhpParser\NodeTraverser;
-use code\codeallocator;
 
 class codeparser
 {

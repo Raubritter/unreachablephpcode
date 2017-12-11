@@ -47,52 +47,18 @@ class CodeAllocator extends NodeVisitorAbstract
             $node->setAttribute('myparent', $this->stack[count($this->stack)-1]);
         }
         if ($this->prev && $this->prev->getAttribute('parent') == $node->getAttribute('parent')) {
-            $node->setAttribute('prev', $this->prev);
-            $this->prev->setAttribute('next', $node);
+            $node->setAttribute('prev', get_class($this->prev));
         }
         $this->stack[] = $node;
     }
     public function leaveNode(Node $node) {
-        if($node->getAttribute("prev") instanceof Node\Stmt\Return_ 
-            || $node->getAttribute("prev") instanceof Node\Stmt\Break_
-            || $node->getAttribute("prev") instanceof Node\Expr\Exit_
-            || $node->getAttribute("prev") instanceof Node\Stmt\Continue_) {
-            if(!($node instanceof Node\Stmt\ClassMethod) && !($node instanceof Node\Stmt\Class_)) {
-                $this->error["deadcode"][] = array("name"=>"if","from"=>$node->getAttribute("startLine"),"to"=>$node->getAttribute("endLine"));
-                $this->last = "";
-            }
-        }
+        $this->checkfordeadcode($node);
+        
         if($node instanceof Node\Stmt\Class_) {
-            //echo "Klassenname: ".$node->name."<br/><br/>";
             $this->classdeclarations[$node->name] = array("name"=>$node->name,"from"=>$node->getAttribute("startLine"),"to"=>$node->getAttribute("endLine"));
         }
         if($node instanceof Node\Expr\Assign) {
-            //echo "<pre>1";echo "</pre><br/>";
-            
-            $dataarray["name"] = $node->var->name;
-            if($node->expr->var->name == "") {
-                if($node->expr->name != "") {
-                    $dataarray["value"] = $this->variables[$node->expr->name]["data"][0]["value"];
-                    $dataarray["type"] = $this->variables[$node->expr->name]["data"][0]["type"];
-                    $dataarray["vtype"] = $this->variables[$node->expr->name]["data"][0]["vtype"];
-                    $dataarray["save"] = $this->variables[$node->expr->name]["data"][0]["save"];
-                } else {
-                    $dataarray["value"] = $node->expr->value;
-                    $dataarray["type"] = gettype($dataarray["value"]);
-                    $dataarray["vtype"] = "local";
-                    $dataarray["save"] = true;
-                }
-            } else {
-                if(in_array($node->expr->var->name,array("_GET","_POST","_SESSION"))){
-                    $dataarray["value"] = "allpossiblevalues!";
-                    $dataarray["type"] = "allpossibletypes!";
-                    $dataarray["vtype"] = "global";
-                    $dataarray["save"] = false;
-                }
-            }
-            $dataarray["min"] = null;
-            $dataarray["max"] = null;
-            $this->variables[$node->var->name]["data"][] = $dataarray;
+            $this->assignvar($node);
         }
         if($node instanceof Node\Stmt\If_) {
             $this->setiferrorcalls($node);
@@ -107,31 +73,20 @@ class CodeAllocator extends NodeVisitorAbstract
             $this->setwhileerrorcalls($node);
         }
         if($node instanceof Node\Stmt\Function_) {
-            //echo "Funktionsnamen:".$node->name."<br/>";
+            unset($this->variables);
             $this->functiondeclarations[0][$node->name] = $node->name;
         }
         if($node instanceof Node\Stmt\ClassMethod) {
-            //echo "Methodennamen: ".$node->name."<br/>";
+            unset($this->variables);
             $this->functiondeclarations[$node->getAttribute("parent")->name][$node->name] = array("name"=>$node->name,"from"=>$node->getAttribute("startLine"),"to"=>$node->getAttribute("endLine"));
-
         }
         if($node instanceof Node\Expr\FuncCall) {
-            //echo "Funktionsaufruf:".$node->name."<br/>";
             $this->functioncalls[0][$node->name->parts[0]] = $node->name->parts[0];
         }
         if($node instanceof Node\Expr\New_) {
-            $this->classvariables[$node->getAttribute("parent")->var->name] = $node->class->parts[0];
-            if(get_class($node->getAttribute("myparent")) != "ClassAllocator" && $node->getAttribute("myparent")->getAttribute("myparent") != "") {
-                if($node->getAttribute("myparent") && $node->getAttribute("myparent")->getAttribute("myparent") && $node->getAttribute("myparent")->getAttribute("myparent")->getAttribute("myparent") instanceof Node\Stmt\Class_){
-                    $this->classcalls[$node->getAttribute("myparent")->getAttribute("myparent")->getAttribute("myparent")->name] = $node->class->parts[0];
-                }
-            }
-            else {
-                   $this->classcalls[$node->class->parts[0]] = $node->class->parts[0];
-            }
+            $this->setupcalls($node);
         }
         if($node instanceof Node\Expr\MethodCall) {
-            //echo "Methodenaufruf:".$node->name."<br/>";
             $this->functioncalls[$this->classvariables[$node->var->name]][$node->name] = $node->name;
         }
         $this->prev = $node;
@@ -142,6 +97,56 @@ class CodeAllocator extends NodeVisitorAbstract
         $this->setfunctionerrorcalls();
         $this->setclasserrorcalls();
         
+    }
+    private function setupcalls($node) {
+        $this->classvariables[$node->getAttribute("parent")->var->name] = $node->class->parts[0];
+        if(get_class($node->getAttribute("myparent")) != "ClassAllocator" && $node->getAttribute("myparent")->getAttribute("myparent") != "") {
+            if($node->getAttribute("myparent") && $node->getAttribute("myparent")->getAttribute("myparent") && $node->getAttribute("myparent")->getAttribute("myparent")->getAttribute("myparent") instanceof Node\Stmt\Class_){
+                //Klassenname raussuchen
+                $this->classcalls[$node->getAttribute("myparent")->getAttribute("myparent")->getAttribute("myparent")->name] = $node->class->parts[0];
+            }
+        }
+        else {
+               $this->classcalls[$node->class->parts[0]] = $node->class->parts[0];
+        }
+    }
+    //if a return / break / exit or continue exists before the node => set error
+    private function checkfordeadcode($node) {
+        if($node->getAttribute("prev") == "PhpParser\Node\Stmt\Return_" 
+            || $node->getAttribute("prev") == "PhpParser\Node\Stmt\Break_"
+            || $node->getAttribute("prev") == "PhpParser\Node\Expr\Exit_"
+            || $node->getAttribute("prev") == "PhpParser\Node\Stmt\Continue_") {
+            if(!($node instanceof Node\Stmt\ClassMethod) && !($node instanceof Node\Stmt\Class_)) {
+                $this->error["deadcode"][] = array("name"=>"if","from"=>$node->getAttribute("startLine"),"to"=>$node->getAttribute("endLine"));
+                $this->last = "";
+            }
+        }
+    }
+    private function assignvar($node) {
+        $dataarray["name"] = $node->var->name;
+        if($node->expr->var->name == "") {
+            if($node->expr->name != "") {
+                $dataarray["value"] = $this->variables[$node->expr->name]["data"][0]["value"];
+                $dataarray["type"] = $this->variables[$node->expr->name]["data"][0]["type"];
+                $dataarray["vtype"] = $this->variables[$node->expr->name]["data"][0]["vtype"];
+                $dataarray["save"] = $this->variables[$node->expr->name]["data"][0]["save"];
+            } else {
+                $dataarray["value"] = $node->expr->value;
+                $dataarray["type"] = gettype($dataarray["value"]);
+                $dataarray["vtype"] = "local";
+                $dataarray["save"] = true;
+            }
+        } else {
+            if(in_array($node->expr->var->name,array("_GET","_POST","_SESSION"))){
+                $dataarray["value"] = "allpossiblevalues!";
+                $dataarray["type"] = "allpossibletypes!";
+                $dataarray["vtype"] = "global";
+                $dataarray["save"] = false;
+            }
+        }
+        $dataarray["min"] = null;
+        $dataarray["max"] = null;
+        $this->variables[$node->var->name]["data"][] = $dataarray;
     }
     private function setfunctionerrorcalls() {
         //für jede Klasse durchgehen
@@ -183,70 +188,44 @@ class CodeAllocator extends NodeVisitorAbstract
     private function setiferrorcalls($if) {
         $valueleft = $this->getvariablevalue($if->cond->left);
         $valueright = $this->getvariablevalue($if->cond->right);
-        
-        print_r($valueleft);print_r($valueright);echo"<br/>";
-        if(!is_array($valueleft) && !is_array($valueright)) {
-            if($valueleft != "allpossiblevalues!" && $valueright != "allpossiblevalues!"){
-                
-                $valueistrue = $this->checkCondition($if->cond,$valueleft,$valueright);
-                if($valueistrue === false) {
-                    $this->error["noif"] = array("name"=>"if","from"=>$if->getAttribute("startLine"),"to"=>$if->getAttribute("endLine"));
+
+        list($count,$size) = $this->checkpossiblecond($if,$valueleft,$valueright);
+        if($count == $size) {
+            $diff = "";
+            if($if->else) {
+                $diff = $if->else->getAttribute("endLine")-$if->else->getAttribute("startLine")+1;
+            }
+            if($if->elseifs) {
+                foreach($if->elseifs as $oneelseif) {
+                    $diff = $diff+$oneelseif->getAttribute("endLine")-$oneelseif->getAttribute("startLine")+1;
                 }
             }
+            $this->error["noif"] = array("name"=>"if","from"=>$if->getAttribute("startLine"),"to"=>$if->getAttribute("endLine")-$diff);
+            unset($if->stmts);
         }
-        elseif(is_array($valueleft) && is_array($valueright)) {
-            foreach($valueleft as $onevalueleft) {
-                foreach($valueright as $onevalueright) {
-                    $valueistrue = $this->checkCondition($if->cond,$onevalueleft,$onevalueright);
-                    if($valueistrue === false) {
-                        break;
-                    }
-                }
-            }
-            if($valueistrue === false) {
-                echo "2";
-                $this->error["noif"] = array("name"=>"if","from"=>$if->getAttribute("startLine"),"to"=>$if->getAttribute("endLine"));
-            }
-        }
-        elseif(is_array($valueleft)) {
-            
-            foreach($valueleft as $onevalueleft) {
-                $valueistrue = $this->checkCondition($if->cond,$onevalueleft,$valueright);
-                if($valueistrue === false) {
-                    break;
-                }
-            }
-            if($valueistrue === false) {
-                echo "3";
-                $this->error["noif"] = array("name"=>"if","from"=>$if->getAttribute("startLine"),"to"=>$if->getAttribute("endLine"));
-            }
-        }
-        elseif(is_array($valueright)) {
-            foreach($valueright as $onevalueright) {
-                $valueistrue = $this->checkCondition($if->cond,$valueleft,$onevalueright);
-                if($valueistrue === false) {
-                    break;
-                }
-            }
-            if($valueistrue === false) {
-                $this->error["noif"] = array("name"=>"if","from"=>$if->getAttribute("startLine"),"to"=>$if->getAttribute("endLine"));
-            }
-        }
-        
     }
     private function setelseerrorcalls($else) {
-        $valueleft = $this->getvariablevalue($else->cond->left);
-        $valueright = $this->getvariablevalue($else->cond->right);
-        //@hotfix left und right vertauscht
-        $valueistrue = $this->checkCondition($else->cond,$valueright,$valueleft);
-        if($valueistrue === false) {
+        $valueleft = $this->getvariablevalue($else->getAttribute("myparent")->cond->left);
+        $valueright = $this->getvariablevalue($else->getAttribute("myparent")->cond->right);
+        list($count,$size) = $this->checkpossiblecond($else->getAttribute("myparent"),$valueright,$valueleft);
+        if($count == $size) {
             $this->error["noelse"] = array("name"=>"else","from"=>$else->getAttribute("startLine"),"to"=>$else->getAttribute("endLine"));
+            unset($else->stmts);
         }
     }
+    
     private function setswitcherrorcalls($switch) {
+        //echo "<pre>";print_r($switch);
         foreach($switch->cases as $onecase) {
-            if($onecase->cond->value != $this->variables[$switch->cond->name]) {
-                $this->error["noswitch"] = array("name"=>"switch","from"=>$switch->getAttribute("startLine"),"to"=>$switch->getAttribute("endLine"));
+            if(is_array($this->variables[$switch->cond->name])) {
+                if(!in_array($onecase->cond->value,$this->variables[$switch->cond->name])) {
+                    $this->error["noswitch"] = array("name"=>"switch","from"=>$onecase->getAttribute("startLine"),"to"=>$onecase->getAttribute("endLine"));
+                }
+            }
+            else {
+                if($onecase->cond->value != $this->variables[$switch->cond->name]) {
+                    $this->error["noswitch"] = array("name"=>"switch","from"=>$onecase->getAttribute("startLine"),"to"=>$onecase->getAttribute("endLine"));
+                }
             }
         }
     }
@@ -259,6 +238,54 @@ class CodeAllocator extends NodeVisitorAbstract
             $this->error["nowhile"] = array("name"=>"while","from"=>$while->getAttribute("startLine"),"to"=>$while->getAttribute("endLine"));
         }
     }
+    
+    private function checkpossiblecond($if,$valueleft,$valueright) {
+
+        if(!is_array($valueleft) && !is_array($valueright)) {
+            $count = 0;
+            $size = 1;
+            if($valueleft != "allpossiblevalues!" && $valueright != "allpossiblevalues!"){
+                $valueistrue = $this->checkCondition($if->cond,$valueleft,$valueright);
+                if($valueistrue === false) {
+                    $count++;
+                }
+            }
+        }
+        elseif(is_array($valueleft) && is_array($valueright)) {
+            $count=0;
+            $size=sizeof($valueleft)*sizeof($valueright);
+            foreach($valueleft as $onevalueleft) {
+                foreach($valueright as $onevalueright) {
+                    $valueistrue = $this->checkCondition($if->cond,$onevalueleft,$onevalueright);
+                    if($valueistrue === false) {
+                        $count++;
+                    }
+                }
+            }
+        }
+        elseif(is_array($valueleft)) {
+            $size = sizeof($valueleft);
+            $count = 0;
+            foreach($valueleft as $onevalueleft) {
+                $valueistrue = $this->checkCondition($if->cond,$onevalueleft,$valueright);
+                if($valueistrue === false) {
+                    $count++;
+                }
+            }
+        }
+        elseif(is_array($valueright)) {
+            $count = 0;
+            $size = sizeof($valueright);
+            foreach($valueright as $onevalueright) {
+                $valueistrue = $this->checkCondition($if->cond,$valueleft,$onevalueright);
+                if($valueistrue === false) {
+                    $count++;
+                }
+            }
+        }
+        return array($count,$size);
+    }
+
     private function checkCondition($cond,$valueleft,$valueright) {
         if($cond instanceof Node\Expr\BinaryOp\GreaterOrEqual && $valueleft < $valueright)
         {

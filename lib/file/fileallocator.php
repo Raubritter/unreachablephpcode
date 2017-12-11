@@ -2,6 +2,8 @@
 
 namespace file;
 
+require 'vendor/autoload.php';
+
 use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 
