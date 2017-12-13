@@ -38,6 +38,12 @@ class CodeAllocator extends NodeVisitorAbstract
     public function getClassDeclarations() {
         return $this->classdeclarations;
     }
+    public function getFunctionCalls() {
+        return $this->functioncalls;
+    }
+    public function getFunctionDeclarations() {
+        return $this->functiondeclarations;
+    }
     public function getError() {
         return $this->error;
     }
@@ -108,15 +114,6 @@ class CodeAllocator extends NodeVisitorAbstract
         array_pop($this->stack);
     }
     /**
-     * take a look, if functions or classes arent called
-     * @param array $nodes
-     */
-    public function afterTraverse(array $nodes) {
-        $this->setfunctionerrorcalls();
-        $this->setclasserrorcalls();
-        
-    }
-    /**
      * sets classcalls
      * @param type $node
      */
@@ -152,7 +149,7 @@ class CodeAllocator extends NodeVisitorAbstract
      */
     private function assignvar($node) {
         $dataarray["name"] = $node->var->name;
-        //$dataarray["parent"] = $node->getAttribute("myParent");
+        $dataarray["parent"] = $node->getAttribute("myparent");
         
         if($node->expr instanceof Node\Expr\FuncCall) {
             $dataarray["value"] = "allpossiblevalues!";
@@ -197,32 +194,8 @@ class CodeAllocator extends NodeVisitorAbstract
             $dataarray["min"] = null;
             $dataarray["max"] = null;
         }
+        //echo "<pre>";print_r($dataarray);
         $this->variables[$node->var->name]["data"][] = $dataarray;
-    }
-    /*
-     * selects, what function wasnt called 
-     */
-    private function setfunctionerrorcalls() {
-        //iterate for every class
-        foreach($this->functiondeclarations as $key=>$onedeclaration) {
-            $diff = array_diff_key($onedeclaration,$this->functioncalls[$key]);
-            if(!empty($diff)) {
-                foreach($diff as $onediff){
-                    $this->error["nofunccall"] = $onediff;
-                }
-            }
-        }
-    }
-    /**
-     * selects what class wasnt called
-     */
-    private function setclasserrorcalls() {
-        $diff = array_diff_key($this->classdeclarations,$this->classcalls);
-        if(!empty($diff)) {
-            foreach($diff as $onediff){
-                $this->error["noclasscall"] = $onediff;
-            }
-        }
     }
     /**
      * selects, if the value is an array or one value
@@ -260,15 +233,11 @@ class CodeAllocator extends NodeVisitorAbstract
         }
         return $this->variables[$name]["data"][0]["value"];
     }
-    /**
-     * takes a look, if the if statment can be reached
-     * @param type $if
-     */
-    private function setiferrorcalls($if) {
+    private function getconditionvalue($if) {
         
-        if($if->cond instanceof Node\Expr\Instanceof_) {
-            $class = $if->cond->class->parts[0];
-            if($this->variables[$if->cond->expr->name]["data"][0]["value"] == $class) {
+        if($if instanceof Node\Expr\Instanceof_) {
+            $class = $if->class->parts[0];
+            if($this->variables[$if->expr->name]["data"][0]["value"] == $class) {
                 $count = 0;
                 $size = 1;
             } else {
@@ -276,11 +245,29 @@ class CodeAllocator extends NodeVisitorAbstract
                 $size = 1;
             }
         } else {
-            $valueleft = $this->getvariablevalue($if->cond->left);
-            $valueright = $this->getvariablevalue($if->cond->right);
+            $valueleft = $this->getvariablevalue($if->left);
+            $valueright = $this->getvariablevalue($if->right);
+            print_r($valueright);
             list($count,$size) = $this->checkpossiblecond($if,$valueleft,$valueright);
+            
         }
-        if($count == $size) {
+        return $count == $size;
+    }
+    private function splitconditions($if) {
+        if($if->cond instanceof Node\Expr\BinaryOp\BooleanAnd) {
+            $left = $this->getconditionvalue($if->cond->left);
+            $right = $this->getconditionvalue($if->cond->right);
+            return ($left && $right);
+        }
+    }
+    /**
+     * takes a look, if the if statment can be reached
+     * @param type $if
+     */
+    private function setiferrorcalls($if) {
+        
+        $conditionsvalue = $this->splitconditions($if);
+        if($conditionsvalue == false) {
             $diff = "";
             if($if->else) {
                 $diff = $if->else->getAttribute("endLine")-$if->else->getAttribute("startLine")+1;
@@ -296,8 +283,8 @@ class CodeAllocator extends NodeVisitorAbstract
     }
     public function unsetvariables($if) {
         foreach($this->variables as $key=>$onevariable) {
-            if($onevariable->data[0]->parent == $if) {
-                unset($this->variables[$key]);
+            if($onevariable["data"][0]["parent"] == $if) {
+                unset($this->variables[$key]["data"][0]);
             }
         }
     }
@@ -429,9 +416,11 @@ class CodeAllocator extends NodeVisitorAbstract
             $size = sizeof($valueleft);
             $count = 0;
             foreach($valueleft as $onevalueleft) {
-                $valueistrue = $this->checkCondition($if->cond,$onevalueleft,$valueright);
+                echo "<pre>";print_r($if);
+                $valueistrue = $this->checkCondition($if,$onevalueleft,$valueright);
                 if($valueistrue === false) {
                     $count++;
+                    echo "ja";
                 }
             }
         }

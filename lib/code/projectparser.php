@@ -17,24 +17,16 @@ use PhpParser\Error;
 use PhpParser\ParserFactory;
 use PhpParser\NodeTraverser;
 
-class codeparser
+class projectparser
 {
     private $error;
     private $classdeclarations;
     private $classcalls;
     private $functiondeclarations;
     private $functioncalls;
-    public function getError(){
-        return $this->error;
-    }
-    public function getClassDeclarations() {
-        return $this->classdeclarations;
-    }
+
     public function getClassCalls() {
         return $this->classcalls;
-    }
-    public function getFunctionDeclarations() {
-        return $this->functiondeclarations;
     }
     public function getFunctionCalls() {
         return $this->functioncalls;
@@ -45,7 +37,7 @@ class codeparser
         try {
             $ast = $parser->parse($code);
             $traverser = new NodeTraverser;
-            $allocator = new CodeAllocator($path);
+            $allocator = new ProjectAllocator($path);
             $traverser->addVisitor($allocator);
             $traverser->traverse($ast);
 
@@ -54,10 +46,7 @@ class codeparser
             return;
         }
         
-        $this->error = $allocator->getError();
-        $this->classdeclarations = $allocator->getClassDeclarations();
         $this->classcalls = $allocator->getClassCalls();
-        $this->functiondeclarations = $allocator->getFunctionDeclarations();
         $this->functioncalls = $allocator->getFunctionCalls();
     }
 }
