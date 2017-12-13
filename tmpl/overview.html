@@ -1,0 +1,31 @@
+<html>
+	<head>
+		<title>Bachelorarbeit</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="icon" type="image/vnd.microsoft.icon" href="img/favicon.ico">
+		<link type="text/css" rel="stylesheet" href="tmpl/css/overview.css"/>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script> 
+		<script src="js/overview.js"></script>
+	</head>
+	<body>
+		<div id="center">
+			<h1> Statische Codeanalyse für unerreichbare Codeelemente</h1>
+			<div class="boxes" id="create">
+				<form action="index.php?area=createnew" method="POST" enctype="multipart/form-data">
+					<div><h3>Neues Projekt anlegen</h3></div><br/>
+					Projektname:<input type="text" id="projectname" name="projectname" /><br/>
+					<input type="file" name="files[]" id="files" multiple="" directory="" webkitdirectory="" mozdirectory=""><br/><br/>
+					<input type="submit" id="create" name="anlegen" value="anlegen"/>
+				</form>
+			</div>
+			<div class="boxes" id="existingproject">
+				<div><h3>Zu bestehendem Projekt</h3></div><br/>
+				<form action="index.php?area=goto" method="POST">
+					<select name="project" id="projects"></select><br/><br/><br/>
+					<input type="submit" id="goto" value="springen">
+				</form>
+			</div>
+			</div>
+	</body>
+</html>
