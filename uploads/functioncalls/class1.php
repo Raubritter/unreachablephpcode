@@ -1,8 +1,11 @@
 <?php
 
-$class31 = new class1();
-$class31->aufruf2();
-$class31->aufruf3();
+include("class2.php");
+include("class3.php");
+
+$class1 = new class1();
+$class1->aufruf2();
+$class1->aufruf3();
 
 class class1
 {
@@ -16,3 +19,4 @@ class class1
         echo "ich werde aufgerufen";
     }
 }
+
