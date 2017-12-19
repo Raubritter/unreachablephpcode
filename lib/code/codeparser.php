@@ -45,8 +45,8 @@ class codeparser
         try {
             $ast = $parser->parse($code);
             $traverser = new NodeTraverser;
-            $allocator = new CodeAllocator($path);
-            $traverser->addVisitor($allocator);
+            $checker = new CodeChecker($path);
+            $traverser->addVisitor($checker);
             $traverser->traverse($ast);
 
         } catch (Error $error) {
@@ -54,10 +54,10 @@ class codeparser
             return;
         }
         
-        $this->error = $allocator->getError();
-        $this->classdeclarations = $allocator->getClassDeclarations();
-        $this->classcalls = $allocator->getClassCalls();
-        $this->functiondeclarations = $allocator->getFunctionDeclarations();
-        $this->functioncalls = $allocator->getFunctionCalls();
+        $this->error = $checker->getError();
+        $this->classdeclarations = $checker->getClassDeclarations();
+        $this->classcalls = $checker->getClassCalls();
+        $this->functiondeclarations = $checker->getFunctionDeclarations();
+        $this->functioncalls = $checker->getFunctionCalls();
     }
 }

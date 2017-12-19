@@ -1,16 +1,27 @@
 <?php
 
-namespace file;
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ * Description of fileparser
+ *
+ * @author Robin
+ */
+namespace clazz;
 
 use PhpParser\Error;
 use PhpParser\ParserFactory;
 use PhpParser\NodeTraverser;
 
-class fileparser
+class classparser
 {
-    private $filecalls;
-    public function getFileCalls(){
-        return $this->filecalls;
+    private $classcalls;
+    public function getClassCalls(){
+        return $this->classcalls;
     }
     public function __construct($code,$path)
     {
@@ -18,7 +29,7 @@ class fileparser
         try {
             $ast = $parser->parse($code);
             $traverser = new NodeTraverser;
-            $allocator = new FileChecker($path);
+            $allocator = new clazz\ClassChecker($path);
             $traverser->addVisitor($allocator);
             $traverser->traverse($ast);
 
@@ -26,6 +37,6 @@ class fileparser
             echo "Parse error: {$error->getMessage()}\n";
             return;
         }
-        $this->filecalls = $allocator->getFileCalls();
+        $this->classcalls = $allocator->getClassCalls();
     }
 }

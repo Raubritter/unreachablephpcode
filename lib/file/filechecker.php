@@ -8,7 +8,7 @@ use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 
 
-class FileAllocator extends NodeVisitorAbstract
+class FileChecker extends NodeVisitorAbstract
 {
     private $filecalls;
     private $path;

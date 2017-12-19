@@ -6,7 +6,7 @@ use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 
 
-class ProjectAllocator extends NodeVisitorAbstract
+class ProjectChecker extends NodeVisitorAbstract
 {
     private $classcalls;
     private $functioncalls;

@@ -6,7 +6,7 @@ use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 
 
-class CodeAllocator extends NodeVisitorAbstract
+class CodeChecker extends NodeVisitorAbstract
 {
     private $classcalls;
     private $functioncalls;
@@ -94,7 +94,7 @@ class CodeAllocator extends NodeVisitorAbstract
         }
         if($node instanceof Node\Stmt\ClassMethod) {
             unset($this->variables);
-            $this->functiondeclarations[$node->getAttribute("parent")->name][$node->name] = array("name"=>$node->name,"from"=>$node->getAttribute("startLine"),"to"=>$node->getAttribute("endLine"));
+            $this->functiondeclarations[$node->getAttribute("myparent")->name][$node->name] = array("name"=>$node->name,"visibility"=>$node->type,"from"=>$node->getAttribute("startLine"),"to"=>$node->getAttribute("endLine"));
         }
         if($node instanceof Node\Expr\FuncCall) {
             if($node->name->parts[0] == "call_user_func" || $node->name->parts[0] == "call_user_func_array"){
@@ -257,6 +257,7 @@ class CodeAllocator extends NodeVisitorAbstract
         if($if->cond instanceof Node\Expr\BinaryOp\BooleanAnd) {
             $left = $this->getconditionvalue($if->cond->left);
             $right = $this->getconditionvalue($if->cond->right);
+            print_r($left." ".$right);
             return ($left && $right);
         }
     }
@@ -416,7 +417,7 @@ class CodeAllocator extends NodeVisitorAbstract
             $size = sizeof($valueleft);
             $count = 0;
             foreach($valueleft as $onevalueleft) {
-                echo "<pre>";print_r($if);
+                echo "<pre>";print_r($onevalueleft);
                 $valueistrue = $this->checkCondition($if,$onevalueleft,$valueright);
                 if($valueistrue === false) {
                     $count++;

@@ -37,7 +37,7 @@ class projectparser
         try {
             $ast = $parser->parse($code);
             $traverser = new NodeTraverser;
-            $allocator = new ProjectAllocator($path);
+            $allocator = new ProjectChecker($path);
             $traverser->addVisitor($allocator);
             $traverser->traverse($ast);
 

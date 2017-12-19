@@ -3,8 +3,9 @@
 use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 
+namespace clazz;
 
-class ClassAllocator extends NodeVisitorAbstract
+class ClassChecker extends NodeVisitorAbstract
 {
     private $classcalls;
     private $functioncalls;

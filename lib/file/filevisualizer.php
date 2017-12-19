@@ -2,14 +2,13 @@
 
 namespace file;
 
-if($_GET['ajax'] != 'file' && $_GET['area'] == 'file') {
-    include("tmpl/filevisualizer.html");
-}
 class filevisualizer
 {    
-    function __construct($filecalls)
+    function __construct()
     {
-        $this->filecalls = $filecalls;
+        if($_GET['ajax'] != 'file' && $_GET['area'] == 'file') {
+            include("tmpl/filevisualizer.html");
+        }
     }
     
 }
