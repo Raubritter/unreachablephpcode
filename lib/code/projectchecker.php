@@ -27,10 +27,13 @@ class ProjectChecker extends NodeVisitorAbstract
         $this->classvariables = [];
         $this->classcalls = [];
         $this->curclass = [];
-        $this->functioncalls[]["__construct"] = array("__construct"=>"");
+        $this->functioncalls = []; //["__construct"] = array("__construct"=>"");
     }
     public function beforeTraverse(array $nodes) {
         $this->filecalls = [];
+    }
+    public function afterTraverse(array $nodes) {
+        $this->functioncalls = [];
     }
     public function getClassCalls() {
         return $this->classcalls;

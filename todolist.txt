@@ -1,0 +1,4 @@
+-Aufruf von Dateien aus anderen Dateien
+-call_user_func
+-instanceof
+

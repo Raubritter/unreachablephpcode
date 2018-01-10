@@ -1,10 +1,12 @@
 <?php
 
-$y = "String";
-$x = $y;
+    $y = "String";
+    $x = $y;
 
-if($y == "String"){
-    if($x == "oh") {
-        echo "nicht erreichbar";
+    if($y == "String"){
+        if($x == "oh") {
+            echo "nicht erreichbar";
+        }
     }
-}
+
+    

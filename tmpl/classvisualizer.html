@@ -7,14 +7,21 @@
 	<!-- Get the highest 1.X version of jQuery from CDN. Required for ready() function. -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script> 
 
-<script src="js/classvisualizer.js"></script>
-<title>Bachelorarbeit</title>
+	<script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/classvisualizer.js"></script>
+	<link type="text/css" rel="stylesheet" href="tmpl/css/visualizer.css"/>
+	<title>Bachelorarbeit</title>
 </head>
-
-<body style="margin:0px;">
-	<a href="index.php?area=file">Dateienübersicht</a>
-	<!--<a href="index.php?area=class">Klassenübersicht</a>-->
-	<a href="index.php?area=code">Codeübersicht</a>
-<canvas id="c" style="border:1px solid black;" width="1024" height="700"></canvas>
+<body style="margin:0px;background-color: #ececec;">
+	<div id="container">
+		<div id="topdiv">
+			<a href="index.php">Zurück zur Übersicht&nbsp;&nbsp;&nbsp;&nbsp;</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			Springe zu Projekt
+			<select id="projects" onchange="changeproj()">
+			</select>
+		</div>
+		<div id="editor" style="width:1024px;height:500px;display:none;"></div>
+		<canvas id="c" width="1024" height="500"></canvas>
+	</div>
 </body>
 </html>

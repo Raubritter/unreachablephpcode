@@ -1,8 +1,6 @@
 	function baseName(str)
 	{
 	   var base = new String(str).substring(str.lastIndexOf('/') + 1); 
-//		if(base.lastIndexOf(".") != -1)       
-//			base = base.substring(0, base.lastIndexOf("."));
 	   return base;
 	}
 	function makefile(key,posx,posy,arrow) {
@@ -15,7 +13,7 @@
 			var file = new fabric.Rect({
 				left: 0,
 				top: 0,
-				width: 120,
+				width: 200,
 				height: 40,
 				fill:"white",
 				stroke: 'black',
@@ -30,29 +28,7 @@
 			group.arrow = arrow;
 			canvas.on('mouse:down', function (e) {
 			if (typeof e.target === "object" && e.target.arrow === null) {
-				$.get("index.php?area=code&ajax=code&file="+e.target.objects[0].text, function(data, status){
-					var editor = ace.edit("editor");
-					editor.setTheme("ace/theme/chrome");
-					editor.getSession().setMode("ace/mode/php");
-					editor.setReadOnly(true);
-					editor.setValue(data);
-					
-					$.get("index.php?area=code&ajax=problem&file="+e.target.objects[0].text, function(data, status){
-						data = JSON.parse(data);
-						var Range = ace.require('ace/range').Range;
-						$.each(data,function(key,value){
-							if(key == "deadcode") {
-								$.each(value,function(key2,value2){
-									editor.session.addMarker(new Range(value2.from-1, 0, value2.to-1, 1), "myMarker", "fullLine");
-								});
-							} else {
-								editor.session.addMarker(new Range(value.from-1, 0, value.to-1, 1), "myMarker", "fullLine");
-							}
-						});
-					});
-					$("#editor").show();
-					$("#c").hide();
-				});
+				window.location.href="index.php?area=class&file="+e.target.objects[0].text;
 			}
 		  });
 			return group;
@@ -210,11 +186,11 @@
 		for (var i in o) {
 			var newfile = func.apply(this,[i,posx,posy+starty*100,null]);
 			if(oldfile !== null){
-				makeArrow([ oldfile.left+60, oldfile.top,newfile.left-60, newfile.top ]);
+				makeArrow([ oldfile.left+100, oldfile.top,newfile.left-100, newfile.top ]);
 			}
 			starty++;
 			if (o[i] !== null && typeof(o[i])=="object") {
-				traverse(o[i],func,posx+200,posy,newfile);
+				traverse(o[i],func,posx+320,posy,newfile);
 			}
 		}
 	}
@@ -233,14 +209,36 @@
 		} else {
 			proj = "";
 		}
-		$.get("index.php?area=file&ajax=file"+proj, function(data, status){
+		$.get("index.php?ajax=file"+proj, function(data, status){
 			var obj = JSON.parse(data);
 			var posx = 0;
 			var posy = 0;
 			traverse(obj,createfilegroup,posx,posy,null);
 		});
 	}
+	function selectprojects() {
+		$.get("index.php?ajax=projects", function(data, status){
+			var obj = JSON.parse(data);
+			var posx = 0;
+			var posy = 0;
+			$.each(obj,function(key,value){
+				$("#projects").append("<option value="+value+">"+value+"</option>");
+			});
+			var proj = getParameterByName("proj");
+			$("#projects").val(proj);
+		});
+	}
+	function getParameterByName(name, url) {
+		if (!url) url = window.location.href;
+		name = name.replace(/[\[\]]/g, "\\$&");
+		var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+			results = regex.exec(url);
+		if (!results) return null;
+		if (!results[2]) return '';
+		return decodeURIComponent(results[2].replace(/\+/g, " "));
+	}
 	$(function () {
 		canvas = new fabric.Canvas('c');
-		displayoverview();
+		displayoverview(getParameterByName("proj"));
+		selectprojects();
 	});

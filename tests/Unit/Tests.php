@@ -16,14 +16,14 @@ class Tests
     }
     public function testunreachablecalls(){
         
-//        $tests->testfunctioncalls();
-//        $tests->testclasscalls();
+//        $this->testfunctioncalls();
+//        $this->testclasscalls();
 //        $this->testunreachablecall1();
-//        
+////        
 //        $this->testunreachablefor();
-        $this->testunreachableif();
+//        $this->testunreachableif();
 //        $this->testunreachableswitch();
-//        $this->testunreachablewhile();
+        $this->testunreachablewhile();
     }
     public function testunreachablefor() {
         $this->testunreachablefor1();
@@ -42,7 +42,9 @@ class Tests
 //        $this->testunreachableif9();
 //        $this->testunreachableif10();
 //        $this->testunreachableif11();
-        $this->testunreachableif12();
+//        $this->testunreachableif12();
+        $this->testunreachableif13();
+//        $this->testunreachableif14();
     }
     public function testunreachableswitch() {
         $this->testunreachableswitch1();
@@ -52,11 +54,12 @@ class Tests
         $this->testunreachableswitch5();
     }
     public function testunreachablewhile() {
-        $this->testunreachablewhile1();
-        $this->testunreachablewhile2();
-        $this->testunreachablewhile3();
-        $this->testunreachablewhile4();
-        $this->testunreachablewhile5();
+//        $this->testunreachablewhile1();
+//        $this->testunreachablewhile2();
+//        $this->testunreachablewhile3();
+//        $this->testunreachablewhile4();
+//        $this->testunreachablewhile5();
+        $this->testunreachablewhile6();
     }
     public function testfunctioncalls(){
         $this->testfunctioncall1();
@@ -181,7 +184,6 @@ class Tests
         $unrct = new general\unreachablecodetool();
         $expect = '{"noif":[{"name":"if","from":7,"to":9}]}';
         $code = $unrct->ajaxgetcodeproblems($file, $proj);
-        print_r($code);
         $this->assertsame($expect, $code, __FUNCTION__);  
     }
     private function testunreachableif10(){
@@ -191,7 +193,6 @@ class Tests
         $unrct = new general\unreachablecodetool();
         $expect = '{"noif":[{"name":"if","from":7,"to":9}]}';
         $code = $unrct->ajaxgetcodeproblems($file, $proj);
-        print_r($code);
         $this->assertsame($expect, $code, __FUNCTION__);  
     }
     private function testunreachableif11(){
@@ -199,9 +200,8 @@ class Tests
         $file = 'uploads/unreachable/if/unreachableif11.php';
             
         $unrct = new general\unreachablecodetool();
-        $expect = '{"noif":[{"name":"if","from":7,"to":9}]}';
+        $expect = '{"noif":[{"name":"if","from":5,"to":7}]}';
         $code = $unrct->ajaxgetcodeproblems($file, $proj);
-        print_r($code);
         $this->assertsame($expect, $code, __FUNCTION__);  
     }
     private function testunreachableif12(){
@@ -211,7 +211,24 @@ class Tests
         $unrct = new general\unreachablecodetool();
         $expect = '{"noif":[{"name":"if","from":7,"to":9}]}';
         $code = $unrct->ajaxgetcodeproblems($file, $proj);
-        print_r($code);
+        $this->assertsame($expect, $code, __FUNCTION__);  
+    }
+    private function testunreachableif13(){
+        $proj = 'unreachable/if';
+        $file = 'uploads/unreachable/if/unreachableif13.php';
+            
+        $unrct = new general\unreachablecodetool();
+        $expect = '{"noif":[{"name":"if","from":7,"to":9}]}';
+        $code = $unrct->ajaxgetcodeproblems($file, $proj);
+        $this->assertsame($expect, $code, __FUNCTION__);  
+    }
+    private function testunreachableif14(){
+        $proj = 'unreachable/if';
+        $file = 'uploads/unreachable/if/unreachableif14.php';
+            
+        $unrct = new general\unreachablecodetool();
+        $expect = '{"noif":[{"name":"if","from":7,"to":9}]}';
+        $code = $unrct->ajaxgetcodeproblems($file, $proj);
         $this->assertsame($expect, $code, __FUNCTION__);  
     }
     private function testunreachableswitch1(){
@@ -302,6 +319,16 @@ class Tests
         $unrct = new general\unreachablecodetool();
         $expect = '[]';
         $code = $unrct->ajaxgetcodeproblems($file, $proj);
+        $this->assertsame($expect, $code, __FUNCTION__);  
+    }
+    private function testunreachablewhile6(){
+        $proj = 'unreachable/while';
+        $file = 'uploads/unreachable/while/unreachablewhile6.php';
+            
+        $unrct = new general\unreachablecodetool();
+        $expect = '[]';
+        $code = $unrct->ajaxgetcodeproblems($file, $proj);
+        print_r($code);
         $this->assertsame($expect, $code, __FUNCTION__);  
     }
     private function testclasscall1(){

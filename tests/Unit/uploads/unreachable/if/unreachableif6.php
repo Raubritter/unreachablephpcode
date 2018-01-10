@@ -1,7 +1,9 @@
 <?php
 
-$y = "hallo";
+    $y = "hallo";
 
-if(strlen($y) < 3){
-    echo "nicht erreichbar";
-}
+    if(strlen($y) < 3){
+        echo "nicht erreichbar";
+    }
+
+    $r = 3;

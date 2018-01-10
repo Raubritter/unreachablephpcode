@@ -1,8 +1,13 @@
 <?php
 
-$y = "3";
-$x = (Int)$y;
+    $y = "3";
+    $x = (Int)$y;
 
-if(is_int($x)){
-    echo "wird erreicht";
-}
+    if(is_int($x)){
+        if(is_int($y)){
+            echo "wird nicht erreicht";
+        }
+
+    }
+
+    $z = 3;

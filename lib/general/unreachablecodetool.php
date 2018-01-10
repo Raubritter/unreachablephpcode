@@ -41,8 +41,7 @@ class unreachablecodetool{
 
         $location = "uploads/".$proj;
 
-        $unrct = new general\unreachablecodetool();
-        $files = $unrct->read_recursiv($location, true);
+        $files = $this->read_recursiv($location, true);
 
         $classcalls = $classparser->getClassCalls();
         $classdeclarations = $classparser->getClassDeclarations();
@@ -55,12 +54,12 @@ class unreachablecodetool{
             if($onefile != $file) {
                 $code = file_get_contents($onefile);
                 $fileparser = new code\projectparser($code,dirname($onefile));
-                $classcalls = $fileparser->getClassCalls();   
-                $functioncalls = $fileparser->getFunctionCalls();   
+                $classcalls = array_merge($fileparser->getClassCalls(),$classcalls);   
+                $functioncalls = array_merge($fileparser->getFunctionCalls(),$functioncalls);   
             }
         }
-
         foreach($functiondeclarations as $key=>$onedeclaration) {
+            echo "<pre>";print_r($functioncalls);
             $diff = array_diff_key($onedeclaration,$functioncalls[$key]);
             if(!empty($diff)) {
                 foreach($diff as $onediff){

@@ -2,12 +2,17 @@
 	"autoload": {
 		"psr-0": {
 			"file":"lib/",
+			"clazz":"lib/",
 			"code":"lib/",
-			"general":"lib/"
+			"general":"lib/",
+			"overview":"lib/"
 		}
 	},
     "require": {
         "nikic/php-parser": "^3.1",
-        "kktsvetkov/krumo": "^0.4.0"
-    }
+	    "phpunit/phpunit": "*"
+    },
+	"require-dev": {
+		"unglud/dusker": "^2.1"
+	}
 }
