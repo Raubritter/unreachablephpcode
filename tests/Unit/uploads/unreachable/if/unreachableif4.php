@@ -1,5 +1,4 @@
 <?php
-
     $x = $_POST['test'];
     $y = $x;
     if($y>3){

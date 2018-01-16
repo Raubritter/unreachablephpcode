@@ -16,13 +16,13 @@ class Tests
     }
     public function testunreachablecalls(){
         
-//        $this->testfunctioncalls();
-//        $this->testclasscalls();
-//        $this->testunreachablecall1();
-////        
-//        $this->testunreachablefor();
-//        $this->testunreachableif();
-//        $this->testunreachableswitch();
+        $this->testfunctioncalls();
+        $this->testclasscalls();
+        $this->testunreachablecall1();
+        
+        $this->testunreachablefor();
+        $this->testunreachableif();
+        $this->testunreachableswitch();
         $this->testunreachablewhile();
     }
     public function testunreachablefor() {
@@ -31,20 +31,20 @@ class Tests
         $this->testunreachablefor3();
     }
     private function testunreachableif() {
-//        $this->testunreachableif1();
-//        $this->testunreachableif2();
-//        $this->testunreachableif3();
-//        $this->testunreachableif4();
-//        $this->testunreachableif5();
-//        $this->testunreachableif6();
-//        $this->testunreachableif7();
-//        $this->testunreachableif8();
-//        $this->testunreachableif9();
-//        $this->testunreachableif10();
+        $this->testunreachableif1();
+        $this->testunreachableif2();
+        $this->testunreachableif3();
+        $this->testunreachableif4();
+        $this->testunreachableif5();
+        $this->testunreachableif6();
+        $this->testunreachableif7();
+        $this->testunreachableif8();
+        $this->testunreachableif9();
+        $this->testunreachableif10();
 //        $this->testunreachableif11();
 //        $this->testunreachableif12();
-        $this->testunreachableif13();
-//        $this->testunreachableif14();
+//        $this->testunreachableif13();
+        $this->testunreachableif14();
     }
     public function testunreachableswitch() {
         $this->testunreachableswitch1();
@@ -54,12 +54,15 @@ class Tests
         $this->testunreachableswitch5();
     }
     public function testunreachablewhile() {
-//        $this->testunreachablewhile1();
-//        $this->testunreachablewhile2();
-//        $this->testunreachablewhile3();
-//        $this->testunreachablewhile4();
-//        $this->testunreachablewhile5();
+        $this->testunreachablewhile1();
+        $this->testunreachablewhile2();
+        $this->testunreachablewhile3();
+        $this->testunreachablewhile4();
+        $this->testunreachablewhile5();
         $this->testunreachablewhile6();
+        $this->testunreachablewhile7();
+        $this->testunreachablewhile8();
+        $this->testunreachablewhile9();
     }
     public function testfunctioncalls(){
         $this->testfunctioncall1();
@@ -137,7 +140,7 @@ class Tests
         $file = 'uploads/unreachable/if/unreachableif4.php';
             
         $unrct = new general\unreachablecodetool();
-        $expect = '{"noif":[{"name":"if","from":7,"to":9}]}';
+        $expect = '{"noif":[{"name":"if","from":5,"to":7}]}';
         $code = $unrct->ajaxgetcodeproblems($file, $proj);
         $this->assertsame($expect, $code, __FUNCTION__);  
     }
@@ -227,7 +230,7 @@ class Tests
         $file = 'uploads/unreachable/if/unreachableif14.php';
             
         $unrct = new general\unreachablecodetool();
-        $expect = '{"noif":[{"name":"if","from":7,"to":9}]}';
+        $expect = '[]';
         $code = $unrct->ajaxgetcodeproblems($file, $proj);
         $this->assertsame($expect, $code, __FUNCTION__);  
     }
@@ -328,7 +331,33 @@ class Tests
         $unrct = new general\unreachablecodetool();
         $expect = '[]';
         $code = $unrct->ajaxgetcodeproblems($file, $proj);
-        print_r($code);
+        $this->assertsame($expect, $code, __FUNCTION__);  
+    }
+    private function testunreachablewhile7(){
+        $proj = 'unreachable/while';
+        $file = 'uploads/unreachable/while/unreachablewhile7.php';
+            
+        $unrct = new general\unreachablecodetool();
+        $expect = '{"endlessloop":[{"name":"while","from":3,"to":5}]}';
+        $code = $unrct->ajaxgetcodeproblems($file, $proj);
+        $this->assertsame($expect, $code, __FUNCTION__);  
+    }
+    private function testunreachablewhile8(){
+        $proj = 'unreachable/while';
+        $file = 'uploads/unreachable/while/unreachablewhile8.php';
+            
+        $unrct = new general\unreachablecodetool();
+        $expect = '{"endlessloop":[{"name":"while","from":3,"to":7}]}';
+        $code = $unrct->ajaxgetcodeproblems($file, $proj);
+        $this->assertsame($expect, $code, __FUNCTION__);  
+    }
+    private function testunreachablewhile9(){
+        $proj = 'unreachable/while';
+        $file = 'uploads/unreachable/while/unreachablewhile9.php';
+            
+        $unrct = new general\unreachablecodetool();
+        $expect = '{"endlessloop":[{"name":"while","from":3,"to":9}]}';
+        $code = $unrct->ajaxgetcodeproblems($file, $proj);
         $this->assertsame($expect, $code, __FUNCTION__);  
     }
     private function testclasscall1(){

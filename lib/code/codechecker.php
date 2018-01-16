@@ -408,6 +408,7 @@ class CodeChecker extends NodeVisitorAbstract
         $conditionsvalue = $this->splitconditions($if->cond);
         if($conditionsvalue == false) {
             $diff = "";
+            //setup the right start (startLine) and endposition (endLine) of the failure
             if($if->else) {
                 $diff = $if->else->getAttribute("endLine")-$if->else->getAttribute("startLine")+1;
             }

@@ -59,7 +59,6 @@ class unreachablecodetool{
             }
         }
         foreach($functiondeclarations as $key=>$onedeclaration) {
-            echo "<pre>";print_r($functioncalls);
             $diff = array_diff_key($onedeclaration,$functioncalls[$key]);
             if(!empty($diff)) {
                 foreach($diff as $onediff){

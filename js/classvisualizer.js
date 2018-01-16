@@ -44,7 +44,7 @@
 					editor.setReadOnly(true);
 					editor.setValue(data);
 					
-					$.get("index.php?area=code&ajax=problem&file="+getParameterByName("file"), function(data, status){
+					$.get("index.php?area=code&ajax=problems&file="+getParameterByName("file"), function(data, status){
 						data = JSON.parse(data);
 						var Range = ace.require('ace/range').Range;
 						$.each(data,function(key,value){
@@ -217,18 +217,20 @@
 	function createmainclass(obj) {
 		$.each(obj[0],function(key,value){
 			var functions = "";
-			$.each(obj[1][key],function(key,value){
-				if(value.visibility === 1){
-					functions += "+ ";
-				}
-				if(value.visibility === 2){
-					functions += "# ";
-				}
-				if(value.visibility === 4){
-					functions += "- ";
-				}
-				functions += value.name+"()\n";
-			});
+			if(obj[1] != undefined){
+				$.each(obj[1][key],function(key,value){
+					if(value.visibility === 1){
+						functions += "+ ";
+					}
+					if(value.visibility === 2){
+						functions += "# ";
+					}
+					if(value.visibility === 4){
+						functions += "- ";
+					}
+					functions += value.name+"()\n";
+				});
+			}
 			var mainclass = makeclass(key,functions);
 
 			canvas.add(mainclass);
